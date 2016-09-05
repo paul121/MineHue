@@ -1,3 +1,5 @@
+local HTTPApiTable = ...
+
 minehue.bridge_connected = false
 minehue.config.bridge = {}
 
@@ -39,7 +41,7 @@ minehue.getBridgeUsername = function(name)
 		url = url,
 		timeout = 10,
 		-- ^ Timeout for connection in seconds. Default is 3 seconds.
-		post_data = "{devicetype:'minetestclient'}"
+		post_data = '{"devicetype":"minetestclient"}'
 		-- ^ Optional, if specified a POST request with post_data is performed.
 		-- ^ Accepts both a string and a table. If a table is specified, encodes table
 		-- ^ as x-www-form-urlencoded key-value pairs.
@@ -52,6 +54,9 @@ minehue.getBridgeUsername = function(name)
 			minehue.config.bridge.username = result[1].success.username
 				minehue.save_config(name)
 			minetest.chat_send_player(name, "Successful username retrieved: "..minehue.config.bridge.username)
+		else
+			minetest.chat_send_player(name, "Error")
+			minetest.chat_send_player(name, req.data)
 		end
 		minetest.show_formspec(name, "minehue:bridge",minehue.get_bridge_formspec())
 	end
@@ -80,16 +85,18 @@ minehue.get_bridge_formspec = function()
 	if minehue.bridge_connected then
 		connected_color = "green"
 	end
+	local tab = minehue.get_formspec_tab(1)
 	local formspec = "size[6,8]"
 		.."button[0,0;2,0.5;main;Back]"
 		.."button_exit[4,0;2,0.5;minehue_exit;Exit]"
-		.."field[0.5,1.5;5,0.5;minehue_hostname;Bridge IP/Hostname;"..minehue.config.bridge.hostname.."]"
-		.."field[0.5,2.5;5,0.5;minehue_username;Bridge Username;"..minehue.config.bridge.username.."]"
-		.."button_exit[1.5,3;3,0.5;minehue_get_username;Get Username]"
+		..tab
+		.."field[0.5,2.5;5,0.5;minehue_hostname;Bridge IP/Hostname;"..minehue.config.bridge.hostname.."]"
+		.."field[0.5,3.5;5,0.5;minehue_username;Bridge Username;"..minehue.config.bridge.username.."]"
+		.."button_exit[1.5,4;3,0.5;minehue_get_username;Get Username]"
 		.."button[0,4;3,0.5;minehue_save;Save Config]"
-		.."button_exit[3,4;3,0.5;minehue_reload;Reload Config]"
-		.."box[0,5;1,1;"..connected_color.."]"
-		.."button_exit[1,5;5,0.5;minehue_connect;Connect]"
+		.."button_exit[3,5;3,0.5;minehue_reload;Reload Config]"
+		.."box[0,6;1,1;"..connected_color.."]"
+		.."button_exit[1,6;5,0.5;minehue_connect;Connect]"
 
 	return formspec
 end
