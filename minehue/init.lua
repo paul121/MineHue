@@ -45,12 +45,12 @@ local HTTPApiTable = minetest.request_http_api()
 minehue = {}
 minehue.config_file = minetest.get_modpath(minetest.get_current_modname()).."/config.txt"
 minehue.config = {}
-minehue.menu = {}
-minehue.menu.lightconfig = "ambient"
+minehue.session = {}
 
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/lightconfig.lua"))(HTTPApiTable)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/bridgeconfig.lua"))(HTTPApiTable)
 assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/lightcontrol.lua"))(http)
+assert(loadfile(minetest.get_modpath(minetest.get_current_modname()) .. "/settingscontrol.lua"))(http)
 
 
 minehue.save_config = function(name)
@@ -98,100 +98,6 @@ minehue.config = minehue.load_config("")
 if minehue.config.bridge.bridgeid ~= "temp" then
 	minehue.connect()
 end
-
-minehue.get_formspec_tab = function(active)
-	if not active then
-    active = 1
-  end
-  active = tonumber(active)
-  local t = {
-    "bridge",
-    "light"
-  }
-	return "tabheader[0.5,2;minehue_tab;Bridge Config, Light Config;"..active..";false;false]"
-end
-
-minehue.get_formspec = function(name, formspec)
-	if not formspec then
-		formspec = 1
-	end
-	formspec = tonumber(formspec)
-	if formspec == 1 then
-		minetest.show_formspec(name, "minehue:bridge", minehue.get_bridge_formspec())
-	elseif formspec == 2 then
-		minetest.show_formspec(name, "minehue:lights", minehue.get_light_formspec())
-	end
-end
-
-
--- register_on_player_receive_fields
-minetest.register_on_player_receive_fields(function(player, formname, fields)
-	local name = player:get_player_name()
-	-- For minehue_tab handling --
-	if fields.minehue_tab then
-		minehue.get_formspec(name, fields.minehue_tab)
-	end
-
-	-- For Bridge Config Handling --
-	if fields.minehue_connect then
-		minehue.connect()
-		minetest.show_formspec(name, formname,minehue.get_bridge_formspec(fields.minehue_tab))
-	end
-	if fields.minehue_get_username then
-		minehue.getBridgeUsername(name)
-	end
-	if fields.minehue_save then
-		minehue.setHostname(name, fields.minehue_hostname)
-		--bridgeconfig["ip"] = fields.minehue_ip
-		minehue.setUsername(name, fields.minehue_username)
-		--bridgeconfig["username"] = fields.minehue_username
-		minehue.save_config(name)
-	end
-	if fields.minehue_reload then
-		minetest.show_formspec(name, formname,minehue.get_bridge_formspec(fields.minehue_tab))
-	end
-
-	-- For Light Config Handling --
-	if fields.minehue_light_tab then
-		minetest.show_formspec(name, formname, minehue.get_light_formspec(fields.minehue_light_tab, fields.minehue_tab))
-	end
-	if fields.minehue_get_all_lights then
-		if minehue.bridge_connected then
-		  minehue.get_all_lights()
-		end
-		minetest.show_formspec(name, formname,minehue.get_light_formspec())
-	end
-	if fields.minehue_add_available_light then
-		minehue.add_light_to_group(fields.minehue_available_lights)
-		minetest.show_formspec(name, formname,minehue.get_light_formspec())
-	end
-	if fields.minehue_remove_light then
-		minehue.remove_light_from_group(fields.minehue_group_lights)
-		minetest.show_formspec(name, formname,minehue.get_light_formspec())
-	end
-end)
-
-
-minehue.commandWrapper = function(name, params)
-	if params == "bridge" or params == "" then
-		minehue.get_formspec(name)
-	elseif params == "lights" then
-		minehue.get_formspec(name, 2)
-	elseif params == "groups" then
-
-	end
-
-end
-
--- register minehue chat command
-minetest.register_chatcommand("minehue", {
-	privs = {
-		interact = true
-	},
-	func = function(name, params)
-		minehue.commandWrapper(name, params)
-	end
-})
 
 
 

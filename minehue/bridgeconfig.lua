@@ -80,17 +80,12 @@ end
 
 
 -- formspec for bridge config
-minehue.get_bridge_formspec = function()
+minehue.get_bridge_formspec_content = function()
 	local connected_color = "red"
 	if minehue.bridge_connected then
 		connected_color = "green"
 	end
-	local tab = minehue.get_formspec_tab(1)
-	local formspec = "size[6,8]"
-		.."button[0,0;2,0.5;main;Back]"
-		.."button_exit[4,0;2,0.5;minehue_exit;Exit]"
-		..tab
-		.."field[0.5,2.5;5,0.5;minehue_hostname;Bridge IP/Hostname;"..minehue.config.bridge.hostname.."]"
+	local formspec = "field[0.5,2.5;5,0.5;minehue_hostname;Bridge IP/Hostname;"..minehue.config.bridge.hostname.."]"
 		.."field[0.5,3.5;5,0.5;minehue_username;Bridge Username;"..minehue.config.bridge.username.."]"
 		.."button_exit[1.5,4;3,0.5;minehue_get_username;Get Username]"
 		.."button[0,4;3,0.5;minehue_save;Save Config]"

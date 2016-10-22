@@ -4,7 +4,9 @@ minehue.config.lights = {}
 minehue.config.lights.available = {}
 minehue.config.lights.zones = {}
 
-local lightconfig_menu = {
+minehue.session.lighttab = 1
+
+local lightconfig_tabs = {
   "ambient",
   "effect"
 }
@@ -26,15 +28,9 @@ minehue.get_light_by_id = function(table, id)
   return nil, nil
 end
 
-minehue.get_light_formspec = function(active)
-  if not active then
-    minetest.debug("No light menu specified")
-    active = 1
-  end
-  active = tonumber(active)
 
-  local group = lightconfig_menu[active]
-  minehue.menu.lightconfig = group
+minehue.get_light_formspec_content = function()
+  local groupname = lightconfig_tabs[minehue.session.lighttab]
 
   local list_items = ""
   for k, v in pairs(minehue.config.lights) do
@@ -42,25 +38,20 @@ minehue.get_light_formspec = function(active)
   end
   local group_items = ""
 
-  for k, v in pairs(minehue.config.groups[group]) do
+  for k, v in pairs(minehue.config.groups[groupname]) do
     group_items = group_items..v.id.." - "..v.name..","
   end
-  minetest.debug("Available lights: "..list_items..", "..group.." lights: "..group_items)
-  local tab = minehue.get_formspec_tab(2)
-  local formspec = "size[6,8]"
-		.."button[0,0;2,0.5;main;Back]"
-    .."button_exit[4,0;2,0.5;minehue_exit;Exit]"
-    ..tab
-    .."tabheader[0.5,3;minehue_light_tab;Ambient Lights, Effect Lights;"..active.."]"
+  minetest.debug("Available lights: "..list_items..", "..groupname.." lights: "..group_items)
+  local formspec = "tabheader[0.5,3;minehue_light_tab;Ambient Lights, Effect Lights;"..minehue.session.lighttab.."]"
     .."label[0.5,3;Available Lights]"
     .."dropdown[0,3.5;3;minehue_available_lights;"..list_items..";1]"
     --.."textlist[0,3.5;3,1;minehue_available_lights;"..list_items.."]"
-    .."button_exit[3.5,3;2,2;minehue_add_available_light;Add Selected Light\n to "..group.." group]"
+    .."button_exit[3.5,3;2,2;minehue_add_available_light;Add Selected Light\n to "..groupname.." group]"
 
-    .."label[0.5,4.5;"..group.." Lights]"
+    .."label[0.5,4.5;"..groupname.." Lights]"
     .."dropdown[0,5;3;minehue_group_lights;"..group_items..";1]"
     --.."textlist[0,5;3,1;minehue_remove_light;"..group_items.."]"
-    .."button_exit[3.5,4.5;2,2;minehue_remove_light;Remove Selected Light\n from "..group.." group]"
+    .."button_exit[3.5,4.5;2,2;minehue_remove_light;Remove Selected Light\n from "..groupname.." group]"
 
     .."button_exit[0.5,6.5;5,0.5;minehue_get_all_lights;Get All Lights]"
 
@@ -104,7 +95,7 @@ end
 
 
 minehue.add_light_to_group = function(lightid)
-  local groupname = minehue.menu.lightconfig
+  local groupname = lightconfig_tabs[minehue.session.lighttab]
   lightid = string.sub(lightid, 0,1)
   minetest.debug(lightid)
 
@@ -118,7 +109,7 @@ minehue.add_light_to_group = function(lightid)
 end
 
 minehue.remove_light_from_group = function(lightid)
-  local groupname = minehue.menu.lightconfig
+  local groupname = lightconfig_tabs[minehue.session.lighttab]
   lightid = string.sub(lightid, 0,1)
   --minetest.debug(lightid)
 
